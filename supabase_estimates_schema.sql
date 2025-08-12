@@ -247,6 +247,8 @@ SELECT
         'material_name', m.name,
         'material_brand', m.brand,
         'material_category', m.category,
+        'material_image_url', m.image_url,
+        'material_description', m.description,
         'quantity', em.quantity,
         'unit_price', em.unit_price,
         'total_price', em.total_price,
