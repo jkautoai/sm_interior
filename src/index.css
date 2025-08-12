@@ -1,0 +1,46 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply text-gray-700 antialiased;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply text-gray-900;
+  }
+}
+
+@layer components {
+  .page-title {
+    @apply text-2xl font-bold text-gray-900 mb-6;
+  }
+  
+  .section-title {
+    @apply text-xl font-semibold text-gray-800 mb-4;
+  }
+  
+  .card-hover {
+    @apply transition-all duration-200 hover:shadow-md;
+  }
+}
+
+/* Animations */
+.fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.slide-in {
+  animation: slideIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideIn {
+  from { transform: translateY(10px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}

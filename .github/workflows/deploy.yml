@@ -1,0 +1,96 @@
+name: 🚀 Deploy Interior Estimator
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  # 코드 품질 검사
+  lint-and-test:
+    name: 🔍 Lint & Test
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+    
+    - name: 📦 Setup Node.js 18
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+    
+    - name: 📋 Install dependencies
+      run: npm ci
+    
+    - name: 🔍 Run ESLint
+      run: npm run lint --if-present
+    
+    - name: 🧪 Run tests
+      run: npm run test --if-present
+    
+    - name: 🏗️ Test build
+      run: npm run build
+      env:
+        VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+        VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+
+  # Vercel 배포
+  deploy-vercel:
+    name: 🚀 Deploy to Vercel
+    runs-on: ubuntu-latest
+    needs: lint-and-test
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+    
+    - name: 🚀 Deploy to Vercel
+      uses: amondnet/vercel-action@v25
+      with:
+        vercel-token: ${{ secrets.VERCEL_TOKEN }}
+        vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+        vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+        vercel-args: '--prod'
+        working-directory: ./
+
+  # Render 상태 확인
+  check-render:
+    name: 🌐 Check Render Deployment
+    runs-on: ubuntu-latest
+    needs: lint-and-test
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+    
+    - name: 🌐 Ping Render Service
+      run: |
+        echo "🌐 Render에서 자동 배포 진행 중..."
+        echo "📍 배포 URL: https://interior-estimator.onrender.com"
+        curl -I https://interior-estimator.onrender.com || echo "⏳ 배포 진행 중 또는 URL 확인 필요"
+
+  # 배포 알림
+  notify:
+    name: 📢 Deployment Notification
+    runs-on: ubuntu-latest
+    needs: [deploy-vercel, check-render]
+    if: always() && github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: 📢 Success Notification
+      if: needs.deploy-vercel.result == 'success'
+      run: |
+        echo "🎉 배포 성공!"
+        echo "📍 Vercel: https://your-project.vercel.app"
+        echo "📍 Render: https://interior-estimator.onrender.com"
+    
+    - name: ❌ Failure Notification  
+      if: needs.deploy-vercel.result == 'failure'
+      run: |
+        echo "❌ 배포 실패!"
+        echo "🔍 로그를 확인하여 문제를 해결하세요."
