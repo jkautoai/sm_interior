@@ -1,5 +1,5 @@
 services:
-  - type: web
+  - type: static
     name: interior-estimator
     env: static
     buildCommand: npm install && npm run build
